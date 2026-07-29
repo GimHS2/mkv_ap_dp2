@@ -10,7 +10,7 @@
 
 (function (factory) {
     if (typeof define === 'function' && define.amd) {
-        define(['jquery', 'handlebars/runtime', 'medium-editor', 'blueimp-file-upload', 'jquery-sortable'], factory);
+        define(['jquery', 'handlebars/runtime', 'medium-editor', 'blueimp-file-upload', 'jquery-sortable', 'dompurify'], factory);
     } else if (typeof module === 'object' && module.exports) {
         module.exports = function (jQuery) {
             if (typeof window === 'undefined') {
@@ -24,16 +24,17 @@
 
             Handlebars = require('handlebars/runtime');
             MediumEditor = require('medium-editor');
+            var DOMPurify = require('dompurify');
             require('jquery-sortable');
             require('blueimp-file-upload');
 
-            factory(jQuery, Handlebars, MediumEditor);
+            factory(jQuery, Handlebars, MediumEditor, DOMPurify);
             return jQuery;
         };
     } else {
-        factory(jQuery, Handlebars, MediumEditor);
+        factory(jQuery, Handlebars, MediumEditor, window.DOMPurify);
     }
-}(function ($, Handlebars, MediumEditor) {
+}(function ($, Handlebars, MediumEditor, DOMPurify) {
 
 this["MediumInsert"] = this["MediumInsert"] || {};
 this["MediumInsert"]["Templates"] = this["MediumInsert"]["Templates"] || {};
@@ -313,7 +314,9 @@ this["MediumInsert"]["Templates"]["src/js/templates/images-toolbar.hbs"] = Handl
             // Restore original embed code from embed wrapper attribute value.
             $data.find('[data-embed-code]').each(function () {
                 var $this = $(this);
-                $this.html($this.attr('data-embed-code'));
+                var embedCode = $this.attr('data-embed-code') || '';
+                var sanitizedEmbedCode = DOMPurify ? DOMPurify.sanitize(embedCode) : '';
+                $this.html(sanitizedEmbedCode);
             });
 
             data[key].value = $data.html();
