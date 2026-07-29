@@ -1225,7 +1225,7 @@ this["MediumInsert"]["Templates"]["src/js/templates/images-toolbar.hbs"] = Handl
                 // Make nice attribute value escaping using jQuery.
                 $div = $('<div>')
                     .attr('data-embed-code', html)
-                    .html(html);
+                    .text(html);
                 html = $('<div>').append($div).html();
             }
 
