@@ -341,7 +341,11 @@
 			if( el ) {
 				var $card = $(el).closest(".card");
 				if( $card.length > 0 ) {
-					var $open = $($(this).attr('data-parent-link')).find('.collapse.show');
+					var parentLinkSelector = $(this).attr('data-parent-link');
+					var $open = $([]);
+					if( _.isString(parentLinkSelector) ) {
+						$open = $(document.querySelectorAll(parentLinkSelector)).find('.collapse.show');
+					}
 					var additionalOffset = 0;
 					if( $card.prevAll().filter($open.closest('.card')).length !== 0 ) {
 						additionalOffset = $open.height();
