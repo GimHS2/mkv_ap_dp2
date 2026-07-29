@@ -1204,6 +1204,48 @@ this["MediumInsert"]["Templates"]["src/js/templates/images-toolbar.hbs"] = Handl
     };
 
     /**
+     * Sanitize embed html before DOM insertion.
+     *
+     * @param {string} html
+     * @return {string}
+     */
+    Embeds.prototype.sanitizeEmbedHtml = function (html) {
+        var allowedTags = {
+                'DIV': true, 'SPAN': true, 'IFRAME': true, 'BLOCKQUOTE': true, 'A': true, 'SCRIPT': true
+            },
+            allowedAttrs = {
+                'class': true, 'width': true, 'height': true, 'src': true, 'frameborder': true,
+                'allowfullscreen': true, 'webkitallowfullscreen': true, 'mozallowfullscreen': true,
+                'align': true, 'lang': true, 'charset': true, 'async': true, 'data-href': true,
+                'scrolling': true, 'allowtransparency': true, 'href': true
+            },
+            nodes = $.parseHTML(html, document, false) || [],
+            $container = $('<div>').append(nodes);
+
+        $container.find('*').each(function () {
+            var el = this,
+                tagName = el.tagName,
+                attrs = $.makeArray(el.attributes || []);
+
+            if (!allowedTags[tagName]) {
+                $(el).remove();
+                return;
+            }
+
+            $.each(attrs, function (_, attr) {
+                var name = (attr.name || '').toLowerCase(),
+                    value = attr.value || '';
+
+                if (!allowedAttrs[name] || name.indexOf('on') === 0 || /^\s*javascript:/i.test(value)) {
+                    el.removeAttribute(attr.name);
+                }
+            });
+        });
+
+        return $container.html();
+    };
+
+    /**
      * Add html to page
      *
      * @param {string} html
@@ -1219,6 +1261,8 @@ this["MediumInsert"]["Templates"]["src/js/templates/images-toolbar.hbs"] = Handl
             alert('Incorrect URL format specified');
             return false;
         } else {
+            html = this.sanitizeEmbedHtml(html);
+
             if (html.indexOf('</script>') > -1) {
                 // Store embed code with <script> tag inside wrapper attribute value.
                 // Make nice attribute value escaping using jQuery.
