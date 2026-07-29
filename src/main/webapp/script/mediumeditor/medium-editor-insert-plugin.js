@@ -312,7 +312,10 @@ this["MediumInsert"]["Templates"]["src/js/templates/images-toolbar.hbs"] = Handl
             // Restore original embed code from embed wrapper attribute value.
             $data.find('[data-embed-code]').each(function () {
                 var $this = $(this);
-                $this.html($this.attr('data-embed-code'));
+                var embedCode = $this.attr('data-embed-code') || '';
+                var parsedNodes = $.parseHTML(embedCode, document, false) || [];
+                var $sanitized = $('<div />').append(parsedNodes);
+                $this.html($sanitized.html());
             });
 
             data[key].value = $data.html();
